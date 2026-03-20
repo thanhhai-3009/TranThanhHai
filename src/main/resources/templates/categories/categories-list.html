@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layout}">
+
+<head>
+    <title th:text="${title} ?: 'Quản lý Danh Mục'">Quản lý Danh Mục</title>
+</head>
+
+<body>
+    <section layout:fragment="content">
+        <div class="crud-section">
+            <div class="crud-header">
+                <h1>Danh Mục Sản Phẩm</h1>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <a th:href="@{/categories/add}" class="btn btn-primary">+ Thêm Danh Mục</a>
+            </div>
+
+            <!-- ===== HIỂN THỊ DẠNG LƯỚI NHƯ TGDĐ ===== -->
+            <div th:each="parentCat : ${categories}" class="category-group">
+                <div class="category-group__header">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <img th:if="${parentCat.icon != null}" th:src="@{${parentCat.icon}}" alt=""
+                             style="width:30px;height:30px;object-fit:contain;border-radius:4px;">
+                        <h2 th:text="${parentCat.name}" style="margin:0;font-size:18px;font-weight:700;"></h2>
+                    </div>
+                    <div style="display:flex;gap:6px;">
+                        <a th:href="@{/categories/edit/{id}(id=${parentCat.id})}" class="btn btn-success"
+                           style="font-size:11px;padding:4px 10px;">Sửa</a>
+                        <a th:href="@{/categories/delete/{id}(id=${parentCat.id})}" class="btn btn-danger"
+                           style="font-size:11px;padding:4px 10px;"
+                           onclick="return confirm('Xóa danh mục này và tất cả danh mục con?')">Xóa</a>
+                    </div>
+                </div>
+
+                <!-- Sub-categories grid -->
+                <div class="subcategory-grid" th:if="${parentCat.children != null and !parentCat.children.isEmpty()}">
+                    <div th:each="child : ${parentCat.children}" class="subcategory-card">
+                        <div class="subcategory-card__icon">
+                            <img th:if="${child.icon != null}" th:src="@{${child.icon}}" alt=""
+                                 class="subcategory-card__img">
+                            <i th:if="${child.icon == null}" class="fa-solid fa-tag"
+                               style="font-size:32px;color:#ccc;"></i>
+                        </div>
+                        <span class="subcategory-card__name" th:text="${child.name}">Danh mục con</span>
+                        <div class="subcategory-card__actions">
+                            <a th:href="@{/categories/edit/{id}(id=${child.id})}" title="Sửa"
+                               style="color:#28a745;font-size:13px;"><i class="fa-solid fa-pen"></i></a>
+                            <a th:href="@{/categories/delete/{id}(id=${child.id})}" title="Xóa"
+                               style="color:#d0021b;font-size:13px;"
+                               onclick="return confirm('Xóa danh mục con này?')"><i class="fa-solid fa-trash"></i></a>
+                        </div>
+                    </div>
+                </div>
+
+                <div th:if="${parentCat.children == null or parentCat.children.isEmpty()}"
+                     style="padding:10px 0;color:#999;font-size:13px;">
+                    Chưa có danh mục con. <a th:href="@{/categories/add}" style="color:#288ad6;">Thêm ngay</a>
+                </div>
+            </div>
+
+            <!-- Danh mục chưa có nhóm cha nào -->
+            <div th:if="${#lists.isEmpty(categories)}" style="text-align:center;padding:40px 0;color:#999;">
+                Chưa có danh mục nào. Hãy <a th:href="@{/categories/add}" style="color:#288ad6;">thêm danh mục</a> đầu tiên.
+            </div>
+        </div>
+    </section>
+</body>
+
+</html>

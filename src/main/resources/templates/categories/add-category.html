@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layout}">
+
+<head>
+    <title>Form Thêm Category</title>
+</head>
+
+<body>
+    <section layout:fragment="content">
+        <div class="crud-section" style="max-width: 600px; margin: 0 auto; margin-top: 20px;">
+            <h1 class="crud-header">Thêm Danh Mục</h1>
+            <form th:action="@{/categories/add}" th:object="${category}" method="post" enctype="multipart/form-data">
+                <div class="mb-3">
+                    <label for="name" class="form-label">Tên danh mục:</label>
+                    <input type="text" id="name" th:field="*{name}" class="form-control"
+                        placeholder="Nhập tên danh mục" />
+                    <div class="text-danger" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="parentId" class="form-label">Danh mục cha (để trống = danh mục gốc):</label>
+                    <select name="parentId" class="form-control" id="parentId">
+                        <option value="">-- Không có (Danh mục gốc) --</option>
+                        <option th:each="p : ${parentCategories}" th:value="${p.id}" th:text="${p.name}"></option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label for="iconFile" class="form-label">Icon / Ảnh minh họa:</label>
+                    <input type="file" name="iconFile" class="form-control" id="iconFile" accept="image/*">
+                </div>
+
+                <div style="margin-top: 20px;">
+                    <button type="submit" class="btn btn-primary">Thêm</button>
+                    <a th:href="@{/categories}" class="btn btn-link">Hủy</a>
+                </div>
+            </form>
+        </div>
+    </section>
+</body>
+
+</html>

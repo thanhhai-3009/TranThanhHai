@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thegioididong.com - Điện thoại, Laptop, Phụ kiện, Đồng hồ chính hãng</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <!-- Sticky Side Banners -->
+    <div class="sticky-banner sticky-banner--left">
+        <a href="#"><img
+                th:src="@{https://cdnv2.tgdd.vn/mwg-static/tgdd/Banner/57/ce/57ce7cd2a7a892afd7f0e1826f9549fd.png}"
+                alt="Banner Trái"></a>
+    </div>
+    <div class="sticky-banner sticky-banner--right">
+        <a href="#"><img
+                th:src="@{https://cdnv2.tgdd.vn/mwg-static/tgdd/Banner/d8/ab/d8ab342d5f6f12580593ebc2adb9b663.png}"
+                alt="Banner Phải"></a>
+    </div>
+
+    <!-- Top Banner (Above Header) -->
+    <div class="top-banner">
+        <div class="container--fluid">
+            <a href="#"><img
+                    th:src="@{https://cdnv2.tgdd.vn/mwg-static/tgdd/Banner/25/28/2528971e6119a5d6b12f5e9b03c11131.png}"
+                    alt="Top Banner"></a>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <!-- Top Header: Logo, Search, User Actions -->
+            <div class="header__top">
+                <a th:href="@{/}" class="header__logo">
+                    <img th:src="@{https://cdnv2.tgdd.vn/webmwg/2024/ContentMwg/images/lunar_new_year/2026/TGDD/logo-dt.png}"
+                        alt="The Gioi Di Dong" class="header__logo-img">
+                </a>
+
+                <div class="header__search">
+                    <input type="text" class="header__search-input" placeholder="Bạn tìm gì...">
+                    <button class="header__search-btn"><i class="fa-solid fa-magnifying-glass"></i></button>
+                </div>
+
+                <div class="header__actions">
+                    <div class="header__action-item">
+                        <a href="#">Lịch sử<br>đơn hàng</a>
+                    </div>
+                    <div class="header__action-item header__action-item--cart">
+                        <a th:href="@{/cart}"><i class="fa-solid fa-cart-shopping"></i><br>Giỏ hàng
+                            <span class="cart-badge" th:if="${cartItemCount > 0}" th:text="${cartItemCount}">0</span>
+                        </a>
+                    </div>
+                    <div class="header__action-item">
+                        <a href="#">Tài khoản<br>của bạn</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Navigation -->
+            <nav class="main-menu">
+                <ul class="main-menu__list">
+                    <!-- Phụ kiện (Single menu item with all accessories categories) -->
+                    <li class="main-menu__item main-menu__item--has-mega" th:if="${parentCategories != null and !parentCategories.isEmpty()}">
+                        <a href="#" class="main-menu__link">
+                            <i class="fa-solid fa-list"></i>
+                            <span>Phụ kiện</span>
+                            <i class="fa-solid fa-chevron-down" style="font-size:10px;margin-left:3px;"></i>
+                        </a>
+
+                        <!-- Mega Dropdown: All categories grouped by parent -->
+                        <div class="mega-dropdown-3level">
+                            <div class="mega-dropdown__container">
+                                <div class="mega-level1-col">
+                                    <!-- Each level1 category (parent) -->
+                                    <div th:each="parentCategory : ${parentCategories}" class="mega-level1-item">
+                                        <h4 class="mega-level1-title" th:text="${parentCategory.name}">Danh mục cha</h4>
+
+                                        <!-- Display children of each parent -->
+                                        <div class="mega-level2-grid" th:if="${parentCategory.children != null and !parentCategory.children.isEmpty()}">
+                                            <a th:each="childCategory : ${parentCategory.children}" class="mega-level2-item" href="#">
+                                                <div class="mega-level2-icon">
+                                                    <img th:if="${childCategory.icon != null}" th:src="@{${childCategory.icon}}" alt=""
+                                                         class="mega-level2-img">
+                                                    <i th:if="${childCategory.icon == null}" class="fa-solid fa-tag"
+                                                       style="font-size:24px;color:#ddd;"></i>
+                                                </div>
+                                                <span class="mega-level2-label" th:text="${childCategory.name}">Danh mục con</span>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- Fixed menu items -->
+                    <li class="main-menu__item">
+                        <a href="#" class="main-menu__link"><i class="fa-solid fa-stopwatch"></i> Smartwatch</a>
+                    </li>
+                    <li class="main-menu__item">
+                        <a href="#" class="main-menu__link"><i class="fa-regular fa-clock"></i> Đồng hồ</a>
+                    </li>
+                    <li class="main-menu__item" th:if="${isUser}">
+                        <a th:href="@{/rewards}" class="main-menu__link"><i class="fa-solid fa-gift"></i> Điểm tích lũy</a>
+                    </li>
+                    <li class="main-menu__item" th:if="${isAdmin or isManager}">
+                        <a th:href="@{/categories}" class="main-menu__link"><i class="fa-solid fa-gear"></i> Quản lý DM</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="container">
+            <!-- Big Banner Section -->
+            <section class="big-banner">
+                        <!-- Top Main Image -->
+                        <div class="big-banner__top">
+                            <a href="#">
+                                <img th:src="@{https://cdnv2.tgdd.vn/mwg-static/tgdd/Banner/f2/e7/f2e7548a58710c27a7e9e78e878a695e.jpg}"
+                                    alt="Big Promotion" class="big-banner__img-top">
+                            </a>
+                        </div>
+                        <!-- Bottom Sub Images -->
+                        <div class="big-banner__bottom">
+                            <a href="#" class="big-banner__item">
+                                <img th:src="@{https://cdnv2.tgdd.vn/mwg-static/tgdd/Banner/12/c6/12c60338494c1708fe45e8f602517800.jpg}"
+                                    alt="Sub Banner 1">
+                            </a>
+                            <a href="#" class="big-banner__item">
+                                <img th:src="@{https://cdnv2.tgdd.vn/mwg-static/tgdd/Banner/b4/a2/b4a2e300d8e9a48aabafb85e7170b5de.jpg}"
+                                    alt="Sub Banner 2">
+                            </a>
+                        </div>
+                    </section>
+
+            <!-- Quick Links -->
+            <section class="quick-links">
+                <ul>
+                    <li><a href="#"><img th:src="@{https://cdn.tgdd.vn/content/phonne-24x24.png}" alt="Điện thoại">Điện
+                            thoại</a></li>
+                    <li><a href="#"><img th:src="@{https://cdn.tgdd.vn/content/laptop-24x24.png}"
+                                alt="Laptop">Laptop</a></li>
+                    <li><a href="#"><img th:src="@{https://cdn.tgdd.vn/content/tablet-24x24.png}"
+                                alt="Tablet">Tablet</a></li>
+                    <li><a href="#"><img th:src="@{https://cdn.tgdd.vn/content/phu-kien-24x24.png}" alt="Phụ kiện">Phụ
+                            kiện</a></li>
+                    <li><a href="#"><img th:src="@{https://cdn.tgdd.vn/content/smartwatch-24x24.png}"
+                                alt="Smartwatch">Smartwatch</a></li>
+                    <li><a href="#"><img th:src="@{https://cdn.tgdd.vn/content/watch-24x24.png}" alt="Đồng hồ">Đồng
+                            hồ</a>
+                    </li>
+                    <li><a href="#"><img th:src="@{https://cdn.tgdd.vn/content/may-cu-24x24.png}" alt="Máy cũ">Máy
+                            cũ</a></li>
+                    <li><a href="#"><img th:src="@{https://cdn.tgdd.vn/content/PC-24x24.png}" alt="PC, Máy in">PC, Máy
+                            in</a>
+                    </li>
+                </ul>
+            </section>
+
+            <!-- Flash Sale – Sản phẩm giảm giá -->
+            <section class="flash-sale" th:if="${!#lists.isEmpty(discountProducts)}">
+                <div class="flash-sale__header">
+                    <h2 class="flash-sale__title">🔥 GIỜ VÀNG - DEAL SỐC</h2>
+                    <div class="flash-sale__countdown">
+                        <span>Kết thúc trong:</span>
+                        <span class="countdown-box">01</span> :
+                        <span class="countdown-box">59</span> :
+                        <span class="countdown-box">30</span>
+                    </div>
+                </div>
+
+                <div class="flash-sale__list">
+                    <!-- Dynamic Discount Products -->
+                    <div class="product-card" th:each="product : ${discountProducts}">
+                        <div class="product-card__img-wrapper">
+                            <img th:if="${product.image != null and product.image != ''}"
+                                 th:src="@{${product.image}}"
+                                 class="product-card__img"
+                                 alt="Product Image">
+                            <img th:unless="${product.image != null and product.image != ''}"
+                                 src="https://placehold.co/200x200?text=No+Image"
+                                 class="product-card__img"
+                                 alt="Product Image">
+                        </div>
+                        <h3 class="product-card__title" th:text="${product.name}"></h3>
+
+                        <!-- Giá gốc gạch ngang -->
+                        <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 6px;">
+                            <span class="product-card__old-price"
+                                  th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT')} + '₫'"></span>
+                            <!-- % Giảm (badge đỏ) -->
+                            <span class="product-card__discount" th:if="${product.discountPercent != null}"
+                                  th:text="'-' + ${#numbers.formatDecimal(product.discountPercent, 0, 'COMMA', 0, 'POINT')} + '%'"
+                                  style="background: #d0021b; color: white; padding: 3px 6px; border-radius: 4px; font-size: 11px; font-weight: 700;"></span>
+                        </div>
+
+                        <!-- Giá sau giảm (đỏ, to) -->
+                        <span class="product-card__price"
+                              th:text="${#numbers.formatDecimal(product.price * (1 - product.discountPercent/100), 0, 'COMMA', 0, 'POINT')} + '₫'"></span>
+
+                        <form th:action="@{/cart/add}" method="post" class="add-cart-form">
+                            <input type="hidden" name="productId" th:value="${product.id}">
+                            <input type="hidden" name="quantity" value="1">
+                            <button type="submit" class="btn btn-primary btn-add-cart">Thêm vào giỏ</button>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Sản phẩm có Quà Tặng -->
+            <section class="gift-section" th:if="${!#lists.isEmpty(giftProducts)}">
+                <div class="gift-section__header">
+                    <h2 class="gift-section__title"><i class="fa-solid fa-gift" style="color: #fff;"></i> KHUYẾN MÃI QUÀ TẶNG KÈMM</h2>
+                </div>
+                <div class="product-grid">
+                    <div class="product-card" th:each="product : ${giftProducts}">
+                        <div class="product-card__img-wrapper">
+                            <img th:if="${product.image != null and product.image != ''}"
+                                 th:src="@{${product.image}}"
+                                 class="product-card__img"
+                                 alt="Product Image">
+                            <img th:unless="${product.image != null and product.image != ''}"
+                                 src="https://placehold.co/200x200?text=No+Image"
+                                 class="product-card__img"
+                                 alt="Product Image">
+                        </div>
+                        <h3 class="product-card__title" th:text="${product.name}"></h3>
+                        <span class="product-card__price"
+                              th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT')} + '₫'"></span>
+
+                        <!-- Badge Quà Tặng -->
+                        <div class="gift-badge" th:if="${product.giftDescription != null}"
+                             style="background: rgba(255, 255, 255, 0.25); color: white; padding: 8px; border-radius: 6px; font-size: 12px; margin-top: 8px; border: 1px dashed rgba(255,255,255,0.5);">
+                            <strong>Tặng:</strong> <span th:text="${product.giftDescription}"></span>
+                        </div>
+
+                        <form th:action="@{/cart/add}" method="post" class="add-cart-form">
+                            <input type="hidden" name="productId" th:value="${product.id}">
+                            <input type="hidden" name="quantity" value="1">
+                            <button type="submit" class="btn btn-primary btn-add-cart">Thêm vào giỏ</button>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Sản phẩm Bình Thường -->
+            <section class="normal-section" th:if="${!#lists.isEmpty(normalProducts)}">
+                <div class="normal-section__header">
+                    <h2 class="normal-section__title">📦 SẢN PHẨM KHÁC</h2>
+                </div>
+                <div class="product-grid">
+                    <div class="product-card" th:each="product : ${normalProducts}">
+                        <div class="product-card__img-wrapper">
+                            <img th:if="${product.image != null and product.image != ''}"
+                                 th:src="@{${product.image}}"
+                                 class="product-card__img"
+                                 alt="Product Image">
+                            <img th:unless="${product.image != null and product.image != ''}"
+                                 src="https://placehold.co/200x200?text=No+Image"
+                                 class="product-card__img"
+                                 alt="Product Image">
+                        </div>
+                        <h3 class="product-card__title" th:text="${product.name}"></h3>
+                        <span class="product-card__price"
+                              th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT')} + '₫'"></span>
+
+                        <form th:action="@{/cart/add}" method="post" class="add-cart-form">
+                            <input type="hidden" name="productId" th:value="${product.id}">
+                            <input type="hidden" name="quantity" value="1">
+                            <button type="submit" class="btn btn-primary btn-add-cart">Thêm vào giỏ</button>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Dynamic Page Content -->
+            <div layout:fragment="content">
+                <!-- Content will be inserted here -->
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer__grid">
+                <div class="footer__column">
+                    <h4>Tổng đài hỗ trợ</h4>
+                    <ul>
+                        <li><a href="#">Gọi mua: 1900 232 460 (7:30 - 22:00)</a></li>
+                        <li><a href="#">Khiếu nại: 1800 1062 (8:00 - 21:30)</a></li>
+                        <li><a href="#">Bảo hành: 1900 232 464 (8:00 - 21:00)</a></li>
+                    </ul>
+                </div>
+                <div class="footer__column">
+                    <h4>Về công ty</h4>
+                    <ul>
+                        <li><a href="#">Giới thiệu công ty (MWG.vn)</a></li>
+                        <li><a href="#">Tuyển dụng</a></li>
+                        <li><a href="#">Gửi góp ý, khiếu nại</a></li>
+                    </ul>
+                </div>
+                <div class="footer__column">
+                    <h4>Thông tin khác</h4>
+                    <ul>
+                        <li><a href="#">Tìm siêu thị</a></li>
+                        <li><a href="#">Chính sách bảo hành</a></li>
+                        <li><a href="#">Mua trả góp</a></li>
+                    </ul>
+                </div>
+                <div class="footer__column">
+                    <h4>Kết nối với chúng tôi</h4>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script th:src="@{/js/script.js}"></script>
+</body>
+
+</html>
+

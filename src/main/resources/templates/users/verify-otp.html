@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{auth-layout}">
+<head>
+    <title>Xác thực OTP</title>
+</head>
+<body>
+<section layout:fragment="content">
+    <h1>✉️ Xác thực Email</h1>
+    <p style="color: #666; margin-bottom: 20px;">
+        Chúng tôi đã gửi mã OTP tới
+        <strong th:text="${email} ?: 'email của bạn'">email@example.com</strong>
+    </p>
+
+    <div th:if="${success}" class="alert alert-success" role="alert" th:text="${success}"></div>
+    <div th:if="${error}" class="alert alert-danger" role="alert" th:text="${error}"></div>
+
+    <form id="verifyForm" th:action="@{/register/verify-otp}" method="post">
+        <div class="form-group">
+            <label for="otp">Nhập mã OTP (6 chữ số)</label>
+            <input type="text" class="form-control" id="otp" name="otp"
+                   placeholder="000000" required maxlength="6" pattern="[0-9]{6}"
+                   style="font-size: 24px; text-align: center; letter-spacing: 8px;">
+            <small style="color: #999;">Mã OTP hợp lệ trong 10 phút</small>
+        </div>
+
+        <div class="form-action">
+            <button type="submit" class="btn btn-primary">Xác thực</button>
+        </div>
+
+        <div style="text-align: center; margin-top: 20px;">
+            <p style="color: #666; margin-bottom: 10px;">Không nhận được mã?</p>
+            <button type="button" id="resendBtn" class="btn btn-secondary"
+                    style="width: auto; padding: 8px 20px; font-size: 14px;">
+                Gửi lại OTP
+            </button>
+            <div id="countdown" style="display: none; margin-top: 10px; color: #d70018; font-weight: 600;"></div>
+        </div>
+
+        <div style="text-align: center; margin-top: 30px; border-top: 1px solid #f0f0f0; padding-top: 20px;">
+            <p style="color: #666; font-size: 14px;">Nhập sai thông tin? <a th:href="@{/register}">Quay lại đăng ký</a></p>
+        </div>
+    </form>
+
+    <script>
+        console.log("Verify OTP page loaded");
+        console.log("Email:", document.querySelector("strong").textContent);
+
+        document.getElementById('resendBtn').addEventListener('click', function() {
+            const btn = this;
+            btn.disabled = true;
+
+            fetch('/register/resend-otp', {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('OTP mới đã được gửi tới email của bạn');
+                    startCountdown(btn);
+                } else {
+                    alert('Lỗi: ' + data.message);
+                    btn.disabled = false;
+                }
+            })
+            .catch(error => {
+                alert('Lỗi khi gửi OTP: ' + error.message);
+                btn.disabled = false;
+            });
+        });
+
+        function startCountdown(btn) {
+            let countdown = 60;
+            const countdownDiv = document.getElementById('countdown');
+            countdownDiv.style.display = 'block';
+            countdownDiv.textContent = 'Gửi lại sau ' + countdown + ' giây';
+
+            const interval = setInterval(() => {
+                countdown--;
+                if (countdown > 0) {
+                    countdownDiv.textContent = 'Gửi lại sau ' + countdown + ' giây';
+                } else {
+                    clearInterval(interval);
+                    countdownDiv.style.display = 'none';
+                    btn.disabled = false;
+                }
+            }, 1000);
+        }
+
+        // Auto-focus vào input OTP
+        document.getElementById('otp').focus();
+
+        // Chỉ cho phép nhập số
+        document.getElementById('otp').addEventListener('keypress', function(e) {
+            if (!/[0-9]/.test(e.key)) {
+                e.preventDefault();
+            }
+        });
+    </script>
+</section>
+</body>
+</html>
+

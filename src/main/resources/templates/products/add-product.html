@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layout}">
+
+<head>
+    <title>Thêm Sản Phẩm</title>
+    <script th:inline="javascript">
+        // Hàm hiển thị/ẩn fields khuyến mãi
+        function togglePromotionFields() {
+            console.log("togglePromotionFields called");
+            const select = document.getElementById('promotionType');
+            const promotionType = select ? select.value : 'NONE';
+
+            console.log("Promotion type selected: " + promotionType);
+
+            const discountField = document.getElementById('discountField');
+            const giftField = document.getElementById('giftField');
+            const promotionStockField = document.getElementById('promotionStockField');
+            const discountInput = document.getElementById('discountPercent');
+            const giftInput = document.getElementById('giftDescription');
+            const promotionStockInput = document.getElementById('promotionStockQuantity');
+
+            if (!discountField || !giftField || !promotionStockField) {
+                console.error("Fields not found!");
+                return;
+            }
+
+            // Ẩn tất cả
+            discountField.style.display = 'none';
+            giftField.style.display = 'none';
+            promotionStockField.style.display = 'none';
+
+            discountInput.required = false;
+            giftInput.required = false;
+            promotionStockInput.required = false;
+
+            // Hiển thị theo loại được chọn
+            if (promotionType === 'DISCOUNT') {
+                discountField.style.display = 'block';
+                promotionStockField.style.display = 'block';
+                discountInput.required = true;
+                promotionStockInput.required = true;
+                console.log("Showing discount field");
+                setTimeout(() => {
+                    discountInput.focus();
+                }, 100);
+            } else if (promotionType === 'GIFT') {
+                giftField.style.display = 'block';
+                promotionStockField.style.display = 'block';
+                giftInput.required = true;
+                promotionStockInput.required = true;
+                console.log("Showing gift field");
+                setTimeout(() => {
+                    giftInput.focus();
+                }, 100);
+            } else {
+                console.log("No field shown - NONE selected");
+            }
+        }
+
+        // Chạy khi DOM ready
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("DOMContentLoaded - initializing");
+            togglePromotionFields();
+
+            // Gán event listener thêm lần nữa để chắc chắn
+            const select = document.getElementById('promotionType');
+            if (select) {
+                select.addEventListener('change', togglePromotionFields);
+                console.log("Event listener attached to select");
+            }
+        });
+    </script>
+</head>
+
+<body>
+    <section layout:fragment="content">
+        <div class="crud-section" style="max-width: 800px; margin: 0 auto; margin-top: 20px;">
+            <h1 class="crud-header">Thêm Sản Phẩm</h1>
+            <form th:action="@{/products/add}" th:object="${product}" method="post" enctype="multipart/form-data">
+                <div class="mb-3">
+                    <label for="name" class="form-label">Tên sản phẩm:</label>
+                    <input type="text" th:field="*{name}" class="form-control" id="name" required
+                        placeholder="Nhập tên sản phẩm">
+                </div>
+
+                <div class="mb-3">
+                    <label for="price" class="form-label">Giá (đ):</label>
+                    <input type="number" th:field="*{price}" class="form-control" id="price" required
+                           placeholder="Giá sản phẩm" step="1000">
+                </div>
+
+                <div class="mb-3">
+                    <label for="category" class="form-label">Danh mục:</label>
+                    <select name="categoryId" class="form-control" id="category">
+                        <option value="">-- Chọn danh mục --</option>
+                        <option th:each="category : ${categories}" th:value="${category.id}"
+                                th:text="${category.name}"></option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label for="imageFile" class="form-label">Hình ảnh:</label>
+                    <input type="file" name="imageFile" class="form-control" id="imageFile" accept="image/*">
+                </div>
+
+                <div class="mb-3">
+                    <label for="description" class="form-label">Mô tả:</label>
+                    <textarea th:field="*{description}" class="form-control" id="description" required
+                              rows="4" placeholder="Mô tả sản phẩm"></textarea>
+                </div>
+
+                <!-- LOẠI KHUYẾN MÃI -->
+                <div class="mb-3" style="background: #f9f9f9; padding: 15px; border-radius: 8px;">
+                    <label for="promotionType" class="form-label"><strong style="font-size: 16px; color: #333;">Loại Khuyến Mãi:</strong></label>
+                    <select id="promotionType" name="promotionType" class="form-control" th:field="*{promotionType}" onchange="togglePromotionFields()">
+                        <option value="NONE">-- Không khuyến mãi --</option>
+                        <option value="DISCOUNT">Giảm Giá (%)</option>
+                        <option value="GIFT">Quà Tặng Kèm</option>
+                    </select>
+
+                    <!-- TRƯỜNG NHẬP % GIẢM GIÁ -->
+                    <div id="discountField" style="margin-top: 15px; display: none; background: #fff; padding: 12px; border: 2px solid #ffd500; border-radius: 6px;">
+                        <label style="font-weight: 600; color: #333; margin-bottom: 8px; display: block;">Nhập % Giảm Giá:</label>
+                        <input type="number" id="discountPercent" class="form-control" th:field="*{discountPercent}"
+                               min="0" max="100" step="1" placeholder="VD: 10, 15, 20, 30..."
+                               style="font-size: 16px; padding: 12px;">
+                    </div>
+
+                    <!-- TRƯỜNG NHẬP QUÀ TẶNG -->
+                    <div id="giftField" style="margin-top: 15px; display: none; background: #fff; padding: 12px; border: 2px solid #667eea; border-radius: 6px;">
+                        <label style="font-weight: 600; color: #333; margin-bottom: 8px; display: block;">Nhập Quà Tặng Kèm:</label>
+                        <input type="text" id="giftDescription" class="form-control" th:field="*{giftDescription}"
+                               placeholder="VD: Tặng bao da, cáp sạc, chuột, ..."
+                               style="font-size: 16px; padding: 12px;">
+                    </div>
+
+                    <!-- TRƯỜNG NHẬP SỐ LƯỢNG KHUYẾN MÃI -->
+                    <div id="promotionStockField" style="margin-top: 15px; display: none; background: #fff; padding: 12px; border: 2px solid #28a745; border-radius: 6px;">
+                        <label style="font-weight: 600; color: #333; margin-bottom: 8px; display: block;">Nhập Số Lượng Khuyến Mãi:</label>
+                        <input type="number" id="promotionStockQuantity" class="form-control" th:field="*{promotionStockQuantity}"
+                               min="0" step="1" placeholder="VD: 50, 100, 200..."
+                               style="font-size: 16px; padding: 12px;">
+                    </div>
+                </div>
+
+                <div style="margin-top: 20px;">
+                    <button type="submit" class="btn btn-primary">Thêm Sản Phẩm</button>
+                    <a th:href="@{/products}" class="btn btn-link">Hủy</a>
+                </div>
+            </form>
+        </div>
+    </section>
+</body>
+
+</html>

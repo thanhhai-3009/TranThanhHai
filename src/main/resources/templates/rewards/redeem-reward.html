@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>Doi diem thanh voucher</title>
+    <meta name="_csrf" th:content="${_csrf != null ? _csrf.token : ''}">
+    <meta name="_csrf_header" th:content="${_csrf != null ? _csrf.headerName : 'X-CSRF-TOKEN'}">
+    <style>
+        .redeem-container { background: #fff; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,.08); padding: 28px; margin: 30px auto 50px; max-width: 850px; }
+        .redeem-header { border-bottom: 2px solid #f1f1f1; padding-bottom: 16px; margin-bottom: 22px; }
+        .redeem-header h1 { margin: 0 0 6px; font-size: 28px; font-weight: 700; }
+        .points-info { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 18px; }
+        .info-box { background: #f8f9fa; border-left: 4px solid #d70018; border-radius: 8px; padding: 14px; }
+        .info-label { font-size: 12px; color: #6c757d; text-transform: uppercase; font-weight: 600; }
+        .info-value { font-size: 26px; font-weight: 700; color: #d70018; }
+        .block { background: #f8f9fa; border: 1px solid #eee; border-radius: 10px; padding: 16px; margin-bottom: 16px; }
+        .block-title { font-size: 14px; color: #666; text-transform: uppercase; font-weight: 600; margin-bottom: 10px; }
+        .option-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
+        .option-btn { border: 2px solid #ddd; border-radius: 8px; background: #fff; padding: 12px; cursor: pointer; transition: all .2s; }
+        .option-btn:hover { border-color: #d70018; background: #fff5f6; }
+        .option-btn.selected { border-color: #d70018; background: #d70018; color: #fff; }
+        .option-points { font-size: 12px; opacity: .9; }
+        .option-value { font-size: 18px; font-weight: 700; }
+        .voucher-type-list { display: flex; gap: 16px; flex-wrap: wrap; }
+        .voucher-type-item { border: 2px solid #e9ecef; border-radius: 8px; padding: 10px 14px; background: #fff; }
+        .otp-info { background: #e8f4f8; border-left: 4px solid #0d6efd; border-radius: 4px; padding: 10px; font-size: 13px; color: #0d6efd; margin-bottom: 10px; }
+        .form-label { font-weight: 600; margin-bottom: 8px; }
+        .form-control:focus { border-color: #d70018; box-shadow: 0 0 0 .25rem rgba(215,0,24,.12); }
+        .actions { display: flex; gap: 10px; margin-top: 14px; }
+        .actions .btn { flex: 1; }
+        .alert { border-left: 4px solid; }
+        .alert-danger { border-left-color: #dc3545; }
+        .alert-success { border-left-color: #198754; }
+    </style>
+</head>
+<body>
+<section layout:fragment="content">
+    <div class="redeem-container">
+        <div class="redeem-header">
+            <h1>Doi diem thanh voucher</h1>
+            <p class="text-muted mb-0">Chon so diem, chon loai voucher, gui OTP va xac nhan.</p>
+        </div>
+
+        <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+        <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+
+        <div class="points-info">
+            <div class="info-box">
+                <div class="info-label">Diem hien co</div>
+                <div class="info-value" th:text="${availablePoints}">0</div>
+            </div>
+            <div class="info-box">
+                <div class="info-label">Ty le co ban</div>
+                <div class="info-value">1000 = 10.000d</div>
+            </div>
+        </div>
+
+        <form id="redeemForm" th:action="@{/rewards/redeem}" method="post" onsubmit="return validateForm()">
+            <input type="hidden" id="pointsInput" name="points" value="">
+
+            <div class="block">
+                <div class="block-title">1) Chon so diem muon doi</div>
+                <div class="option-grid">
+                    <button th:each="option : ${voucherOptions}" type="button" class="option-btn"
+                            th:if="${option <= availablePoints}"
+                            th:attr="data-points=${option}"
+                            onclick="selectOption(this)">
+                        <div class="option-points" th:text="${option} + ' diem'"></div>
+                        <div class="option-value" th:text="${#numbers.formatDecimal(option * 10.0, 0, 'COMMA', 0, 'POINT')} + 'd'">0d</div>
+                    </button>
+                </div>
+            </div>
+
+            <div class="block">
+                <div class="block-title">2) Chon loai voucher</div>
+                <div class="voucher-type-list">
+                    <label class="voucher-type-item">
+                        <input type="radio" name="voucherType" value="FIXED" checked>
+                        Giam tien co dinh
+                    </label>
+                    <label class="voucher-type-item">
+                        <input type="radio" name="voucherType" value="PERCENTAGE">
+                        Giam theo phan tram
+                    </label>
+                </div>
+            </div>
+
+            <div class="block">
+                <div class="block-title">3) Xac thuc OTP</div>
+                <div class="otp-info">Bam "Gui OTP" de nhan ma qua email, sau do nhap ma de doi voucher.</div>
+                <div class="mb-2">
+                    <label for="otp" class="form-label">Ma OTP</label>
+                    <div class="d-flex gap-2">
+                        <input id="otp" name="otp" type="text" class="form-control" maxlength="6" placeholder="Nhap 6 chu so" required>
+                        <button id="sendOtpBtn" type="button" class="btn btn-outline-primary" onclick="sendOTP()">Gui OTP</button>
+                    </div>
+                    <small id="otpHint" class="text-muted">OTP co hieu luc 10 phut.</small>
+                </div>
+                <div class="actions">
+                    <button type="submit" class="btn btn-danger">Xac nhan doi voucher</button>
+                    <a th:href="@{/rewards}" class="btn btn-outline-secondary">Quay lai</a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        let selectedPoints = 0;
+
+        function selectOption(button) {
+            document.querySelectorAll('.option-btn').forEach(btn => btn.classList.remove('selected'));
+            button.classList.add('selected');
+            selectedPoints = parseInt(button.getAttribute('data-points')) || 0;
+            document.getElementById('pointsInput').value = selectedPoints;
+        }
+
+        function csrfHeaders() {
+            const token = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
+            const headerName = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content') || 'X-CSRF-TOKEN';
+            const headers = {};
+            if (token) headers[headerName] = token;
+            return headers;
+        }
+
+        function sendOTP() {
+            if (!selectedPoints) {
+                alert('Vui long chon so diem truoc khi gui OTP');
+                return;
+            }
+
+            const btn = document.getElementById('sendOtpBtn');
+            const hint = document.getElementById('otpHint');
+            btn.disabled = true;
+            hint.textContent = 'Dang gui OTP...';
+
+            fetch('/rewards/send-otp', {
+                method: 'POST',
+                headers: csrfHeaders()
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    hint.textContent = 'OTP da gui. Vui long kiem tra email.';
+                    startCountdown(btn);
+                } else {
+                    hint.textContent = data.message || 'Gui OTP that bai.';
+                    btn.disabled = false;
+                }
+            })
+            .catch(() => {
+                hint.textContent = 'Loi gui OTP. Thu lai sau.';
+                btn.disabled = false;
+            });
+        }
+
+        function startCountdown(btn) {
+            let s = 60;
+            btn.textContent = 'Gui lai (' + s + 's)';
+            const id = setInterval(() => {
+                s -= 1;
+                if (s <= 0) {
+                    clearInterval(id);
+                    btn.disabled = false;
+                    btn.textContent = 'Gui OTP';
+                    return;
+                }
+                btn.textContent = 'Gui lai (' + s + 's)';
+            }, 1000);
+        }
+
+        function validateForm() {
+            if (!selectedPoints) {
+                alert('Vui long chon so diem muon doi');
+                return false;
+            }
+            const otp = document.getElementById('otp').value.trim();
+            if (!/^\d{6}$/.test(otp)) {
+                alert('OTP phai gom 6 chu so');
+                return false;
+            }
+            return true;
+        }
+    </script>
+</section>
+</body>
+</html>
+

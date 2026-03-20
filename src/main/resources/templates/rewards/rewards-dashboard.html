@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>Điểm tích lũy</title>
+    <style>
+        .rewards-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            padding: 30px;
+            margin-top: 30px;
+            margin-bottom: 50px;
+        }
+
+        .rewards-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #f1f1f1;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        .rewards-header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin: 0;
+        }
+
+        .reward-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .stat-card.active {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .stat-card.used {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .stat-card-value {
+            font-size: 36px;
+            font-weight: 700;
+            margin: 10px 0;
+        }
+
+        .stat-card-label {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .redeem-button {
+            display: inline-block;
+            background-color: #d70018;
+            color: white;
+            padding: 12px 30px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+        }
+
+        .redeem-button:hover {
+            background-color: #b30014;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(215, 0, 24, 0.3);
+        }
+
+        .vouchers-section h2 {
+            font-size: 22px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-top: 40px;
+            margin-bottom: 20px;
+        }
+
+        .voucher-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .voucher-card {
+            background: white;
+            border: 2px solid #f0f0f0;
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+
+        .voucher-card:hover {
+            border-color: #d70018;
+            box-shadow: 0 4px 15px rgba(215, 0, 24, 0.15);
+        }
+
+        .voucher-code {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 6px;
+            font-weight: 600;
+            color: #d70018;
+            margin: 10px 0;
+            font-size: 14px;
+            word-break: break-all;
+        }
+
+        .voucher-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #d70018;
+            margin: 10px 0;
+        }
+
+        .voucher-status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        .status-active {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .status-used {
+            background-color: #cce5ff;
+            color: #004085;
+        }
+
+        .status-expired {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .empty-state img {
+            width: 100px;
+            opacity: 0.5;
+            margin-bottom: 20px;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+<section layout:fragment="content">
+    <div class="rewards-container">
+        <div class="rewards-header">
+            <h1>💎 Điểm tích lũy của bạn</h1>
+            <a th:href="@{/rewards/redeem}" class="redeem-button">Đổi điểm</a>
+        </div>
+
+        <!-- Thông báo -->
+        <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+        <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+        <!-- Thống kê -->
+        <div class="reward-stats">
+            <div class="stat-card">
+                <div class="stat-card-label">Tổng điểm tích lũy</div>
+                <div class="stat-card-value" th:text="${rewardPoints.totalPoints}">0</div>
+            </div>
+
+            <div class="stat-card active">
+                <div class="stat-card-label">Điểm có thể dùng</div>
+                <div class="stat-card-value" th:text="${rewardPoints.getAvailablePoints()}">0</div>
+            </div>
+
+            <div class="stat-card used">
+                <div class="stat-card-label">Voucher đã sử dụng</div>
+                <div class="stat-card-value" th:text="${activeVouchersCount}">0</div>
+            </div>
+        </div>
+
+        <!-- Vouchers -->
+        <div class="vouchers-section">
+            <h2>🎟️ Voucher của bạn</h2>
+
+            <div th:if="${!vouchers.isEmpty()}" class="voucher-grid">
+                <div th:each="voucher : ${vouchers}" class="voucher-card">
+                    <div style="font-weight: 600; margin-bottom: 10px;">
+                        Voucher
+                        <span th:if="${voucher.type == 'PERCENTAGE'}"
+                              th:text="${#numbers.formatDecimal(voucher.value, 0, 'COMMA', 0, 'POINT')} + '%'">0%</span>
+                        <span th:unless="${voucher.type == 'PERCENTAGE'}"
+                              th:text="${#numbers.formatDecimal(voucher.value, 0, 'COMMA', 0, 'POINT')} + '₫'">0₫</span>
+                    </div>
+
+                    <div class="voucher-code">
+                        <span th:text="${voucher.code}">CODE</span>
+                        <span style="cursor: pointer; float: right;" onclick="copyToClipboard(this)">📋</span>
+                    </div>
+
+                    <div style="font-size: 12px; color: #666;">
+                        <div>Điểm dùng: <span th:text="${voucher.pointsUsed}">0</span> điểm</div>
+                        <div>Tạo: <span th:text="${#dates.format(voucher.createdAt, 'dd/MM/yyyy HH:mm')}">date</span></div>
+                        <div>Hết hạn: <span th:text="${#dates.format(voucher.expiryDate, 'dd/MM/yyyy')}">date</span></div>
+                    </div>
+
+                    <div>
+                        <span class="voucher-status" th:classappend="${'status-' + voucher.status.toLowerCase()}"
+                              th:text="${voucher.status == 'ACTIVE' ? 'Có thể sử dụng' : (voucher.status == 'USED' ? 'Đã sử dụng' : 'Hết hạn')}">
+                            Status
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div th:if="${vouchers.isEmpty()}" class="empty-state">
+                <p>Bạn chưa có voucher nào. <a th:href="@{/rewards/redeem}">Đổi điểm ngay</a></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function copyToClipboard(el) {
+            const code = el.previousElementSibling.textContent.trim();
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Đã sao chép mã voucher!');
+            });
+        }
+    </script>
+</section>
+</body>
+</html>
+

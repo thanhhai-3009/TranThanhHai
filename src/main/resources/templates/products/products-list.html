@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+
+<head>
+    <title th:text="${title} ?: 'Danh Sách Sản Phẩm'">Danh Sách Sản Phẩm</title>
+</head>
+
+<body>
+<section layout:fragment="content">
+    <div class="crud-section">
+        <div class="crud-header">
+            <h1>Quản Lý Sản Phẩm</h1>
+        </div>
+
+        <div>
+            <a th:if="${isAdmin or isManager}" th:href="@{/products/add}" class="btn btn-primary" style="margin-bottom: 20px;">+ Thêm Sản Phẩm</a>
+        </div>
+
+        <!-- ===== FLASH SALE - GIẢM GIÁ ===== -->
+        <section class="flash-sale" th:if="${!#lists.isEmpty(discountProducts)}">
+            <div class="flash-sale__header">
+                <h2 class="flash-sale__title">🔥 GIỜ VÀNG - DEAL SỐC</h2>
+                <div class="flash-sale__countdown">
+                    <span>Kết thúc trong:</span>
+                    <span class="countdown-box">01</span> :
+                    <span class="countdown-box">59</span> :
+                    <span class="countdown-box">30</span>
+                </div>
+            </div>
+
+            <div class="flash-sale__list">
+                <div class="product-card" th:each="product : ${discountProducts}">
+                    <div class="product-card__img-wrapper">
+                        <img th:if="${product.image != null and product.image != ''}"
+                             th:src="@{${product.image}}"
+                             class="product-card__img"
+                             alt="Product Image"
+                             style="max-width:200px; max-height:200px; object-fit:cover;">
+                        <img th:unless="${product.image != null and product.image != ''}"
+                             src="https://placehold.co/200x200?text=No+Image"
+                             class="product-card__img"
+                             alt="Product Image"
+                             style="max-width:200px; max-height:200px; object-fit:cover;">
+                    </div>
+                    <h3 class="product-card__title" th:text="${product.name}"></h3>
+
+                    <!-- Giá gốc gạch + % giảm -->
+                    <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 6px;">
+                            <span class="product-card__old-price"
+                                  th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT')} + '₫'"></span>
+                        <span class="product-card__discount" th:if="${product.discountPercent != null}"
+                              th:text="'-' + ${#numbers.formatDecimal(product.discountPercent, 0, 'COMMA', 0, 'POINT')} + '%'"
+                              style="background: #d0021b; color: white; padding: 3px 6px; border-radius: 4px; font-size: 11px; font-weight: 700;"></span>
+                    </div>
+
+                    <!-- Giá mới (to, đỏ) -->
+                    <span class="product-card__price"
+                          th:text="${#numbers.formatDecimal(product.price * (1 - product.discountPercent/100), 0, 'COMMA', 0, 'POINT')} + '₫'"></span>
+                    <div class="promo-row" th:if="${product.promotionStockQuantity != null}">
+                        <span class="discount-badge" th:text="'KM con lai: ' + ${product.promotionStockQuantity}"></span>
+                    </div>
+
+                    <!-- Add to cart form -->
+                    <form th:action="@{/cart/add}" method="post" class="add-cart-form">
+                        <input type="hidden" name="productId" th:value="${product.id}">
+                        <input type="hidden" name="quantity" value="1">
+                        <button type="submit" class="btn btn-primary btn-add-cart">Thêm vào giỏ</button>
+                    </form>
+
+                    <!-- Action buttons -->
+                    <div th:if="${isAdmin or isManager}" style="display: flex; gap: 5px; margin-top: 10px;">
+                        <a th:href="@{/products/edit/{id}(id=${product.id})}" class="btn btn-success"
+                           style="font-size: 11px; padding: 4px 8px; flex: 1; text-align: center;">Sửa</a>
+                        <a th:href="@{/products/delete/{id}(id=${product.id})}" class="btn btn-danger"
+                           style="font-size: 11px; padding: 4px 8px; flex: 1; text-align: center;"
+                           onclick="return confirm('Chắc xóa?')">Xóa</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== QUÀ TẶNG ===== -->
+        <section class="gift-section" th:if="${!#lists.isEmpty(giftProducts)}">
+            <div class="gift-section__header">
+                <h2 class="gift-section__title">🎁 KHUYẾN MÃI QUÀ TẶNG KÈM</h2>
+            </div>
+            <div class="product-grid">
+                <div class="product-card" th:each="product : ${giftProducts}">
+                    <div class="product-card__img-wrapper">
+                        <img th:if="${product.image != null and product.image != ''}"
+                             th:src="@{${product.image}}"
+                             class="product-card__img"
+                             alt="Product Image"
+                             style="max-width:200px; max-height:200px; object-fit:cover;">
+                        <img th:unless="${product.image != null and product.image != ''}"
+                             src="https://placehold.co/200x200?text=No+Image"
+                             class="product-card__img"
+                             alt="Product Image"
+                             style="max-width:200px; max-height:200px; object-fit:cover;">
+                    </div>
+                    <h3 class="product-card__title" th:text="${product.name}"></h3>
+                    <span class="product-card__price"
+                          th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT')} + '₫'"></span>
+
+                    <!-- Badge quà tặng -->
+                    <div class="gift-badge"
+                         th:if="${product.promotionType == 'GIFT' and product.giftDescription != null}"
+                         th:text="${product.giftDescription}">
+                    </div>
+                    <div class="promo-row" th:if="${product.promotionStockQuantity != null}">
+                        <span class="discount-badge" th:text="'Qua KM con lai: ' + ${product.promotionStockQuantity}"></span>
+                    </div>
+
+                    <!-- Add to cart form -->
+                    <form th:action="@{/cart/add}" method="post" class="add-cart-form">
+                        <input type="hidden" name="productId" th:value="${product.id}">
+                        <input type="hidden" name="quantity" value="1">
+                        <button type="submit" class="btn btn-primary btn-add-cart">Thêm vào giỏ</button>
+                    </form>
+
+                    <!-- Action buttons -->
+                    <div th:if="${isAdmin or isManager}" style="display: flex; gap: 5px; margin-top: 10px;">
+                        <a th:href="@{/products/edit/{id}(id=${product.id})}" class="btn btn-success"
+                           style="font-size: 11px; padding: 4px 8px; flex: 1; text-align: center;">Sửa</a>
+                        <a th:href="@{/products/delete/{id}(id=${product.id})}" class="btn btn-danger"
+                           style="font-size: 11px; padding: 4px 8px; flex: 1; text-align: center;"
+                           onclick="return confirm('Chắc xóa?')">Xóa</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== SẢN PHẨM BÌNH THƯỜNG ===== -->
+        <section class="normal-section" th:if="${!#lists.isEmpty(normalProducts)}">
+            <div class="normal-section__header">
+                <h2 class="normal-section__title">📦 SẢN PHẨM KHÁC</h2>
+            </div>
+            <div class="product-grid">
+                <div class="product-card" th:each="product : ${normalProducts}">
+                    <div class="product-card__img-wrapper">
+                        <img th:if="${product.image != null and product.image != ''}"
+                             th:src="@{${product.image}}"
+                             class="product-card__img"
+                             alt="Product Image"
+                             style="max-width:200px; max-height:200px; object-fit:cover;">
+                        <img th:unless="${product.image != null and product.image != ''}"
+                             src="https://placehold.co/200x200?text=No+Image"
+                             class="product-card__img"
+                             alt="Product Image"
+                             style="max-width:200px; max-height:200px; object-fit:cover;">
+                    </div>
+                    <h3 class="product-card__title" th:text="${product.name}"></h3>
+                    <span class="product-card__price"
+                          th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT')} + '₫'"></span>
+
+                    <!-- Add to cart form -->
+                    <form th:action="@{/cart/add}" method="post" class="add-cart-form">
+                        <input type="hidden" name="productId" th:value="${product.id}">
+                        <input type="hidden" name="quantity" value="1">
+                        <button type="submit" class="btn btn-primary btn-add-cart">Thêm vào giỏ</button>
+                    </form>
+
+                    <!-- Action buttons -->
+                    <div th:if="${isAdmin or isManager}" style="display: flex; gap: 5px; margin-top: 10px;">
+                        <a th:href="@{/products/edit/{id}(id=${product.id})}" class="btn btn-success"
+                           style="font-size: 11px; padding: 4px 8px; flex: 1; text-align: center;">Sửa</a>
+                        <a th:href="@{/products/delete/{id}(id=${product.id})}" class="btn btn-danger"
+                           style="font-size: 11px; padding: 4px 8px; flex: 1; text-align: center;"
+                           onclick="return confirm('Chắc xóa?')">Xóa</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </div>
+</section>
+</body>
+
+</html>
+
+<style>
+    .promo-row { margin-top: 8px; display:flex; align-items:center; gap:8px; }
+    .discount-badge {
+        color:#d93025; font-weight:700; background:rgba(255,230,230,0.9);
+        padding:2px 6px; border-radius:4px; font-size:0.85rem;
+    }
+    .gift-badge {
+        background:linear-gradient(90deg,#f5e8ff,#fff0f7);
+        color:#5b2a86; padding:6px 10px; border-radius:6px;
+        font-size:0.85rem; max-width:160px; white-space:nowrap;
+        overflow:hidden; text-overflow:ellipsis; box-shadow:0 1px 2px rgba(0,0,0,0.06);
+    }
+</style>

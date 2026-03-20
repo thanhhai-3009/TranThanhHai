@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>Chi tiet voucher</title>
+</head>
+<body>
+<section layout:fragment="content">
+    <div class="container" style="max-width: 720px; margin: 30px auto 50px;">
+        <div class="card shadow-sm border-0 rounded-3">
+            <div class="card-body p-4">
+                <h3 class="mb-3">Thong tin voucher</h3>
+                <div class="mb-2"><strong>Ma:</strong> <span th:text="${voucher.code}">CODE</span></div>
+                <div class="mb-2">
+                    <strong>Loai:</strong>
+                    <span th:text="${voucher.type == 'PERCENTAGE' ? 'Giam theo %' : 'Giam tien co dinh'}">Loai</span>
+                </div>
+                <div class="mb-2">
+                    <strong>Gia tri:</strong>
+                    <span th:if="${voucher.type == 'PERCENTAGE'}" th:text="${#numbers.formatDecimal(voucher.value, 0, 'COMMA', 0, 'POINT')} + '%'">0%</span>
+                    <span th:unless="${voucher.type == 'PERCENTAGE'}" th:text="${#numbers.formatDecimal(voucher.value, 0, 'COMMA', 0, 'POINT')} + '₫'">0₫</span>
+                </div>
+                <div class="mb-2" th:if="${voucher.maxDiscount != null}"><strong>Giam toi da:</strong> <span th:text="${#numbers.formatDecimal(voucher.maxDiscount, 0, 'COMMA', 0, 'POINT')} + '₫'">0₫</span></div>
+                <div class="mb-2" th:if="${voucher.minOrderValue != null}"><strong>Don toi thieu:</strong> <span th:text="${#numbers.formatDecimal(voucher.minOrderValue, 0, 'COMMA', 0, 'POINT')} + '₫'">0₫</span></div>
+                <div class="mb-2"><strong>Trang thai:</strong> <span th:text="${voucher.status}">ACTIVE</span></div>
+                <div class="mb-3"><strong>Het han:</strong> <span th:text="${#temporals.format(voucher.expiryDate, 'dd/MM/yyyy HH:mm')}">date</span></div>
+                <a th:href="@{/rewards}" class="btn btn-outline-secondary">Quay lai</a>
+            </div>
+        </div>
+    </div>
+</section>
+</body>
+</html>
+

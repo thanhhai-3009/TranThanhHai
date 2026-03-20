@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layout}">
+
+<head>
+    <title>Cập nhật Danh Mục</title>
+</head>
+
+<body>
+    <section layout:fragment="content">
+        <div class="crud-section" style="max-width: 600px; margin: 0 auto; margin-top: 20px;">
+            <h1 class="crud-header">Cập nhật Danh Mục</h1>
+            <form th:action="@{/categories/update/{id}(id=${category.id})}" th:object="${category}" method="post"
+                  enctype="multipart/form-data">
+
+                <div class="mb-3">
+                    <label for="name" class="form-label">Tên danh mục:</label>
+                    <input type="text" th:field="*{name}" class="form-control" id="name" required>
+                    <div class="text-danger" th:if="${#fields.hasErrors('name')}" th:errors="*{name}">Tên bắt buộc.</div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="parentId" class="form-label">Danh mục cha:</label>
+                    <select name="parentId" class="form-control" id="parentId">
+                        <option value="">-- Không có (Danh mục gốc) --</option>
+                        <option th:each="p : ${parentCategories}" th:value="${p.id}" th:text="${p.name}"
+                                th:selected="${category.parent != null and category.parent.id == p.id}"></option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Icon hiện tại:</label>
+                    <div th:if="${category.icon != null}">
+                        <img th:src="@{${category.icon}}" alt="current icon"
+                             style="width:80px;height:80px;object-fit:contain;border:1px solid #ddd;border-radius:6px;padding:4px;">
+                    </div>
+                    <div th:if="${category.icon == null}" style="color:#999;">Chưa có icon</div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="iconFile" class="form-label">Thay đổi Icon:</label>
+                    <input type="file" name="iconFile" class="form-control" id="iconFile" accept="image/*">
+                </div>
+
+                <div style="margin-top: 20px;">
+                    <button type="submit" class="btn btn-primary">Cập nhật</button>
+                    <a th:href="@{/categories}" class="btn btn-link">Hủy</a>
+                </div>
+            </form>
+        </div>
+    </section>
+</body>
+
+</html>

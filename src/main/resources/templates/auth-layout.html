@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title layout:title-pattern="$CONTENT_TITLE - The Gioi Di Dong">The Gioi Di Dong</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        main {
+            flex: 1;
+        }
+
+        .auth-container {
+            max-width: 450px;
+            margin: 40px auto;
+            padding: 40px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+
+        .auth-container h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #d70018;
+            box-shadow: 0 0 0 3px rgba(215, 0, 24, 0.1);
+        }
+
+        .form-action {
+            margin-top: 30px;
+        }
+
+        .form-action .btn {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 6px;
+            transition: all 0.3s;
+        }
+
+        .form-action .btn-primary {
+            background-color: #d70018;
+            border-color: #d70018;
+            color: white;
+        }
+
+        .form-action .btn-primary:hover {
+            background-color: #b30014;
+            border-color: #b30014;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(215, 0, 24, 0.3);
+        }
+
+        .form-action p {
+            text-align: center;
+            margin-top: 20px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .form-action a {
+            color: #d70018;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .form-action a:hover {
+            text-decoration: underline;
+        }
+
+        .alert {
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+
+        .alert-danger {
+            background-color: #fee;
+            border: 1px solid #fcc;
+            color: #c33;
+        }
+
+        .alert ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        .alert li {
+            margin: 5px 0;
+        }
+
+        .form-check {
+            margin-bottom: 20px;
+        }
+
+        .form-check-input {
+            cursor: pointer;
+            width: 18px;
+            height: 18px;
+            accent-color: #d70018;
+        }
+
+        .form-check-label {
+            margin-left: 8px;
+            cursor: pointer;
+            user-select: none;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Sticky Side Banners -->
+    <div class="sticky-banner sticky-banner--left">
+        <a href="#"><img
+                th:src="@{https://cdnv2.tgdd.vn/mwg-static/tgdd/Banner/57/ce/57ce7cd2a7a892afd7f0e1826f9549fd.png}"
+                alt="Banner Trái"></a>
+    </div>
+    <div class="sticky-banner sticky-banner--right">
+        <a href="#"><img
+                th:src="@{https://cdnv2.tgdd.vn/mwg-static/tgdd/Banner/d8/ab/d8ab342d5f6f12580593ebc2adb9b663.png}"
+                alt="Banner Phải"></a>
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <!-- Top Header: Logo, Search, User Actions -->
+            <div class="header__top">
+                <a th:href="@{/}" class="header__logo">
+                    <img th:src="@{https://cdnv2.tgdd.vn/webmwg/2024/ContentMwg/images/lunar_new_year/2026/TGDD/logo-dt.png}"
+                        alt="The Gioi Di Dong" class="header__logo-img">
+                </a>
+
+                <div class="header__search">
+                    <input type="text" class="header__search-input" placeholder="Bạn tìm gì...">
+                    <button class="header__search-btn"><i class="fa-solid fa-magnifying-glass"></i></button>
+                </div>
+
+                <div class="header__actions">
+                    <div class="header__action-item">
+                        <a href="#">Lịch sử<br>đơn hàng</a>
+                    </div>
+                    <div class="header__action-item header__action-item--cart">
+                        <a th:href="@{/cart}"><i class="fa-solid fa-cart-shopping"></i><br>Giỏ hàng
+                            <span class="cart-badge" th:if="${cartItemCount > 0}" th:text="${cartItemCount}">0</span>
+                        </a>
+                    </div>
+                    <div class="header__action-item">
+                        <a href="#">Tài khoản<br>của bạn</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <section layout:fragment="content" class="auth-container">
+            <!-- Auth content will be inserted here -->
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer__grid">
+                <div class="footer__column">
+                    <h4>Tổng đài hỗ trợ</h4>
+                    <ul>
+                        <li><a href="#">Gọi mua: 1900 232 460 (7:30 - 22:00)</a></li>
+                        <li><a href="#">Khiếu nại: 1800 1062 (8:00 - 21:30)</a></li>
+                        <li><a href="#">Bảo hành: 1900 232 464 (8:00 - 21:00)</a></li>
+                    </ul>
+                </div>
+                <div class="footer__column">
+                    <h4>Về công ty</h4>
+                    <ul>
+                        <li><a href="#">Giới thiệu công ty (MWG.vn)</a></li>
+                        <li><a href="#">Tuyển dụng</a></li>
+                        <li><a href="#">Gửi góp ý, khiếu nại</a></li>
+                    </ul>
+                </div>
+                <div class="footer__column">
+                    <h4>Thông tin khác</h4>
+                    <ul>
+                        <li><a href="#">Tìm siêu thị</a></li>
+                        <li><a href="#">Chính sách bảo hành</a></li>
+                        <li><a href="#">Mua trả góp</a></li>
+                    </ul>
+                </div>
+                <div class="footer__column">
+                    <h4>Kết nối với chúng tôi</h4>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script th:src="@{/js/script.js}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
